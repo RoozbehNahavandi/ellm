@@ -1,0 +1,16 @@
+wandb: Currently logged in as: roozbeh-n99. Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.16.6 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.16.5
+wandb: Run data is saved locally in /users/PAS2138/roozbehn99/ellm/exp_local/2024.04.05/TEST_RUN_132606/wandb/run-20240405_132707-jnutxgat
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run TEST_RUN
+wandb: ⭐️ View project at https://wandb.ai/roozbeh-n99/text-crafter_T
+wandb: 🚀 View run at https://wandb.ai/roozbeh-n99/text-crafter_T/runs/jnutxgat/workspace
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+wandb: ERROR Dropped streaming file chunk (see wandb/debug-internal.log)
+slurmstepd: error: *** JOB 163032 ON a0022 CANCELLED AT 2024-04-05T21:21:20 ***
