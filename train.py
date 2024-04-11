@@ -247,7 +247,7 @@ class Workspace:
                     action = self.agent.act(time_step.observation,
                                                 self.global_step,
                                                 eval_mode=True)
-    
+
                     env.set_rand_actions(self.agent.rand_action)
                 final_subtask = env.on_final_subtask() or subtask == task
                 time_step = env.step(action)
@@ -283,6 +283,7 @@ class Workspace:
                 with torch.no_grad(), utils.eval_mode(self.agent):
 
                     action = self.agent.act(time_step.observation,
+
                                             self.global_step,
                                             eval_mode=True)
                     env.set_rand_actions(self.agent.rand_action)
@@ -483,6 +484,7 @@ class Workspace:
                 action = self.agent.act(time_step.observation,
                                         self.global_step,
                                         eval_mode=False, other_model=self.other_model)
+
                 self.train_env.set_rand_actions(self.agent.rand_action)
             self.agent_time += time.time() - start_time
 

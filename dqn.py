@@ -312,6 +312,7 @@ class DQNAgent:
             obs = self.preprocess_obs(obs)
             Qs = self.critic(obs)
             action = Qs.argmax(dim=1).item()
+
         return action
 
     def update_critic(self, batch, step):
@@ -390,7 +391,6 @@ class DQNAgent:
 
 
 
-    
 class Actor(nn.Module):
     def __init__(self, encoder, obs_shape, num_actions, hidden_dim, use_image, use_language_state, use_goal, vocab, goal_encoder_type, device, other_dim):
         super().__init__()

@@ -114,7 +114,6 @@ agent:
   goal_encoder_type: sbert # gru or transformer or sbert
   use_language: False # Uncomment or +args for RND/NovelD/APT
   noveld: False # Uncomment or + args for RND/NovelD
-
   finetune_settings: ${finetune_settings}
   other_model_prob: ${other_model_prob}
 
