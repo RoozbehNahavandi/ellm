@@ -10,7 +10,6 @@
 #SBATCH --mem=32G
 #SBATCH --export=ALL
 #SBATCH --time=5:00:00
-export OPENAI_API_KEY='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'
 
 # Run your Python script
 # python train.py use_wandb=true env_spec.use_sbert=True use_goal=True use_language_state=sbert env_spec.lm_spec.lm_class=GPTLanguageModel env_spec.lm_spec.openai_key=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 exp_name=TEST_RUN
