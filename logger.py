@@ -153,7 +153,7 @@ class Logger(object):
                 resume = False
             else:
                 resume = 'must'
-            self._wb.init(project='text-crafter_{}'.format(config.exp_name[0]), config=dict(config), name=config.exp_name, entity='roozbeh-n99', resume=resume, id=resume_id)
+            self._wb.init(project='text-crafter', config=dict(config), name=config.exp_name, entity='roozbeh-n99', resume=resume, id=resume_id)
         else:
             self._wb = None
 

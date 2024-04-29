@@ -154,7 +154,8 @@ class Workspace:
             cfg.agent,
             obs_shape=self.train_env.observation_spec()['obs'].shape,
             num_actions=ac_shape,
-            other_dim=other_dim)
+            other_dim=other_dim,
+            cfg = cfg.env_spec)
         self.timer = utils.Timer()
 
     @property
@@ -283,7 +284,6 @@ class Workspace:
                 with torch.no_grad(), utils.eval_mode(self.agent):
 
                     action = self.agent.act(time_step.observation,
-
                                             self.global_step,
                                             eval_mode=True)
                     env.set_rand_actions(self.agent.rand_action)
@@ -449,13 +449,14 @@ class Workspace:
                 episode_reward = 0
                 if 'Housekeep' in self.cfg.env_spec.name:
                     max_rearrange_success = 0
-            # try to save snapshot
-            if self.cfg.save_snapshot and save_every_step(self.global_step):
-                start_time = time.time()
-                self.save_snapshot()
-                self.save_time += time.time() - start_time
+            # try to save snapshot # TODO I should remove it
+            # if self.cfg.save_snapshot and save_every_step(self.global_step):
+            #     start_time = time.time()
+            #     self.save_snapshot()
+            #     self.save_time += time.time() - start_time
                     
             # Save cache
+            # print('self.global_step is: ',self.global_step)
             if save_every_step(self.global_step):
                 start_time = time.time()
                 if self.train_env.use_sbert_sim:
@@ -491,7 +492,7 @@ class Workspace:
             # try to update the agent
             start_time = time.time()
             if not seed_until_step(self.global_step) and (not self.cfg.train_after_reward or self.cumulative_train_reward >= 1):
-                metrics = self.agent.update(self.replay_iter, self.global_step)
+                metrics = self.agent.update(self.replay_iter, self.global_step, self.train_env)
                 self.update_time += time.time() - start_time
                 if log_time:
                     # Separate the dict into two dicts, one for the agent metrics and one for the grad norm metrics (every key which starts with 'grad')
@@ -513,6 +514,7 @@ class Workspace:
             start_time = time.time()
             self.train_env.set_step(self._global_step)
             time_step = self.train_env.step(action)
+            # print('we are taking a step.')
             self.cumulative_train_reward += time_step.reward
             if self.cfg.decay_after_reward:
                 if self.cumulative_train_reward >= 1:
@@ -582,7 +584,7 @@ class Workspace:
 
 
             # try to update the agent
-            metrics = self.agent.update(self.replay_iter, self.global_step)
+            metrics = self.agent.update(self.replay_iter, self.global_step, self.train_env)
             self.logger.log_metrics(metrics, self.global_frame, ty='train')
 
             episode_step += 1
@@ -590,6 +592,7 @@ class Workspace:
             self.eval_env.set_step(self._global_step)
 
     def save_snapshot(self):
+        print('THIS RIGHT HERE IS HAPPENING')
         temp_snapshot = self.work_dir / 'temp.pt'
         snapshot = self.work_dir / 'snapshot.pt'
         keys_to_save = ['agent', 'timer', '_global_step', '_global_episode']
@@ -605,6 +608,7 @@ class Workspace:
         with temp_snapshot.open('wb') as f:
             torch.save(payload, f)
             os.rename(temp_snapshot, snapshot)
+        print('THIS RIGHT HERE IS HAPPENING 2')
 
 
     def load_snapshot(self, snapshot=None, agent_only=False):

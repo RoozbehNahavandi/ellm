@@ -1,0 +1,10 @@
+{
+    "llama_13b_chat": "/fs/ess/PAS2570/short_ans_feedback/models/Llama-2-13B-chat-GPTQ",
+    "yi": "/fs/ess/PAS2570/short_ans_feedback/models/yi-34B-v3-GPTQ",
+    "judgeLM_7b": "/fs/ess/PAS2570/short_ans_feedback/models/JudgeLM-7B-v1.0",
+    "vicuna-13b-gptq": "/fs/ess/PAS2570/short_ans_feedback/models/vicuna-13B-v1.5-16K-GPTQ",
+    "vicuna-13b": "/fs/ess/PAS2570/short_ans_feedback/models/vicuna-13b-v1.5",
+    "mistral-7b-gptq": "/fs/ess/PAS2570/short_ans_feedback/models/Mistral-7B-Instruct-v0.2-GPTQ",
+    "mistral-7b": "/users/PAS2138/roozbehn99/ellm/LMs/Mistral-7B-Instruct-v0.2/models--mistralai--Mistral-7B-Instruct-v0.2/snapshots/41b61a33a2483885c981aa79e0df6b32407ed873",                                         
+    "alpaca-30b": "/fs/ess/PAS2570/short_ans_feedback/models/gpt4-alpaca-lora-30B-GPTQ"
+}

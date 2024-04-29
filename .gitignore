@@ -30,3 +30,6 @@ lm_cache.pkl
 embedding_cache.pkl
 temp/
 wandb/
+LMs/
+key.txt
+store/

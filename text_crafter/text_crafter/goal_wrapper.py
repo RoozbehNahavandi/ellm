@@ -550,7 +550,8 @@ class CrafterLMGoalWrapper(CrafterGoalWrapper):
         # Make a copy of the LM and oracle achievement sets
         self.old_lm_achievements = copy.deepcopy(self.lm.achievements)
         self.old_oracle_achievements = copy.deepcopy(self.oracle_lm.achievements)
-        
+        # print('old suggested actions =', self.old_suggested_actions, '*******', self.old_lm_achievements)
+
         info['env_reward'] = reward
 
         health_reward = info['health_reward']

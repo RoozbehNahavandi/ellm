@@ -1,10 +1,0 @@
-wandb: Currently logged in as: roozbeh-n99. Use `wandb login --relogin` to force relogin
-wandb: wandb version 0.16.6 is available!  To upgrade, please run:
-wandb:  $ pip install wandb --upgrade
-wandb: Tracking run with wandb version 0.16.5
-wandb: Run data is saved locally in /users/PAS2138/roozbehn99/ellm/exp_local/2024.04.05/TEST_RUN_APT_112710/wandb/run-20240405_112749-d6mdu0mv
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run TEST_RUN_APT
-wandb: ⭐️ View project at https://wandb.ai/roozbeh-n99/text-crafter_T
-wandb: 🚀 View run at https://wandb.ai/roozbeh-n99/text-crafter_T/runs/d6mdu0mv/workspace
-Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00, 353.83it/s]slurmstepd: error: *** JOB 163011 ON a0019 CANCELLED AT 2024-04-05T21:26:33 DUE TO TIME LIMIT ***

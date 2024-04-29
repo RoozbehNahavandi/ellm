@@ -10,8 +10,8 @@ max_seq_tokens: 200 # Max token length of both text obs and goals
 env_spec:
   name: CrafterTextEnv-v1
   lm_spec:
-    lm_class: SimpleOracle
-    lm: code-davinci-002  # Only used for the GPT lm_classes (GPTLanguageModel, GPTHousekeep)
+    lm_class: GPTLanguageModel
+    lm: 'gpt-3.5-turbo-instruct' # Only used for the GPT lm_classes (GPTLanguageModel, GPTHousekeep)
     prompt: BulletPrompt  # Format of the prompt
     max_tokens: ${max_seq_tokens}
     temperature: .1

@@ -8,10 +8,18 @@ import pathlib
 import fcntl
 import time
 import numpy as np
+import json
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from anthropic import Anthropic
+from anthropic.types import MessageParam
+
+
+
 
 # Language models provided by OpenAI. They are ranked from best to worst (quality-wise)
 LANGUAGE_MODELS = [
     'code-davinci-002', # Codex Model
+    'gpt-3.5-turbo-instruct',
     'gpt-3.5-turbo-instruct',
     'text-davinci-002',  # Best model, slowest and priciest
     'text-curie-001',
@@ -215,6 +223,7 @@ class GPTLanguageModel(LanguageModel):
         self.novelty_bonus = novelty_bonus
         prices = {
             'code-davinci-002' : 0.0/ 1000,
+            'gpt-3.5-turbo-instruct' : 0.0 / 1000,
             'text-davinci-002': 0.06 / 1000,
             'text-curie-001': 0.006 / 1000,
             'text-babbage-001': 0.0012 / 1000, 
@@ -243,6 +252,64 @@ class GPTLanguageModel(LanguageModel):
         self.api_key_idx = 0
         self.stop = stop_token
         openai.organization = openai_org
+
+
+        self.history_config_fp = os.path.join(os.path.dirname(__file__), 'history_lm_config.json')
+        self.history_config = json.load(open(self.history_config_fp))
+        self.history_model_name = 'claude'
+        self.history_model_path = self.history_config['mistral-7b']
+        self.history_model = AutoModelForCausalLM.from_pretrained(
+            self.history_model_path,
+            device_map='auto',
+            trust_remote_code=False,
+        )
+        self.history_tokenizer = AutoTokenizer.from_pretrained(self.history_model_path)
+
+        self.history_prompt_templates = {
+    'llama': """[INST] <<SYS>>
+You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+<</SYS>>
+{prompt}[/INST]
+""",
+    'yi': """<|user|>
+{prompt}
+<|assistant|>
+""",
+    'judgeLM_7b': '{prompt}',
+    'vicuna-13b-gptq': """A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: {prompt} ASSISTANT:
+
+""",
+    'vicuna-13b': """A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: {prompt} ASSISTANT:
+
+""",
+    'mistral-7b-gptq': '''<s>[INST] {prompt} [/INST]
+''',
+    'mistral-7b': '''<s>[INST] {prompt} [/INST]
+''',
+    'alpaca-30b': "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n### Instruction:\n{prompt}\n\n### Response:\n"
+}
+
+        self.history_lm_argss = {'mistral-7b': {
+        'do_sample': False,
+        'max_new_tokens': 512,
+    }}
+        self.history_prompt_prefix = """
+We have an agent who is playing in the crafter game.
+I am going to tell you the history of what the player has done, seen, and achieved so far alongside the current observation 
+and it's current achievemenets. I want you to give me a new history based on the previous history and new information.
+Don't add any other information to it beside the achievements and what has already been done.
+"""
+        self.history = """
+You haven't done anything yet. 
+"""
+        self.history_models_args = {'mistral-7b': {
+        'do_sample': False,
+        'max_new_tokens': 512,
+    }}
+
+        self.claude_client = Anthropic(api_key = 'CLAUDE_API_KEY')
+
+
 
     def load_cache(self):
         if not self.cache_path.exists():
@@ -328,6 +395,58 @@ class GPTLanguageModel(LanguageModel):
         if self.verbose: print(f"Budget used (x 1000): {self.budget_used * 1000}, avg price: {avg_price}")
         self.api_queries += 1
         return response
+    
+    def create_history_prompt(self, initial_prompt):
+        lines = initial_prompt.split('\n')
+        filtered_lines = [line for line in lines if not line.strip().startswith('-')]
+        clean_prompt = ''
+        for i, line in enumerate(filtered_lines):
+            if i > 2:
+                clean_prompt += line    
+        cleaner_prompt = clean_prompt.split('What do you do?')
+        processed_prompt = ''
+        for i, p in enumerate(cleaner_prompt):
+            processed_prompt += p
+        history_prompt = self.history_prompt_prefix + '\nAchievements: ' + f'{self.achievements}' + '\nObservation: \n' + f'{processed_prompt}' + '\nHistory:\n' + f'{self.history}'
+        # print('---------------------')
+        # print('The history prompt is:', history_prompt)
+        # print('---------------------')
+
+        return history_prompt
+    
+    def predict_history(self, initial_prompt): 
+        history_prompt = self.create_history_prompt(initial_prompt)
+        if self.history_model_name == 'mistral-7b':
+
+            preproc_prompt = self.history_prompt_templates['mistral-7b'].format(prompt=history_prompt)
+            inputs = self.history_tokenizer(preproc_prompt, return_tensors='pt').input_ids.cuda()
+            output = self.history_model.generate(inputs=inputs, **self.history_models_args['mistral-7b'])
+            out = self.history_tokenizer.decode(output[0])
+            response = out.split('[/INST]\n')[1][:-4]
+        elif self.history_model_name == 'claude':
+
+            message = history_prompt
+            system_prompt = self.history_prompt_prefix
+
+            message = self.claude_client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=1024,
+                system = system_prompt,
+                messages=[
+                    {'role': 'user', 'content': message}
+                ]
+            )
+            response = message.content[0].text
+            # print('claude history prompot = \n', response)
+            # print('==============================')
+
+        # print('====================')
+        # print('the predicted history is:', response)
+        # print('====================')
+
+        self.history = response
+        finalPrompt = f'{self.history}\n' + initial_prompt
+        return finalPrompt
 
     def predict_options(self, state_dict, env=None):
         """
@@ -358,12 +477,19 @@ class GPTLanguageModel(LanguageModel):
                 attempts = 0
                 while response is None:
                     try:
+                        # print('the prompt is:', prompt) # TODO
+                        final_prompt = self.predict_history(prompt)
+                        # print('*******************')
+                        # print('This is the final prompt:\n', final_prompt)
+                        # print('*******************')
+
                         response = openai.Completion.create(engine=self.lm,
-                                                            prompt=prompt,
+                                                            prompt=final_prompt, # TODO
                                                             max_tokens=self.max_tokens,
                                                             stop=self.stop,
                                                             temperature=self.temperature,
                                                             frequency_penalty=0)
+                        # print('the damn response is:', response)
                     except Exception as e:
                         self.api_key_idx = (self.api_key_idx + 1) % len(self.api_key_list)
                         openai.api_key = self.api_key_list[self.api_key_idx]
