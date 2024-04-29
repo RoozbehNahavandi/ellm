@@ -78,7 +78,7 @@ import os
 from anthropic import Anthropic
 from anthropic.types import MessageParam
 
-client = Anthropic(api_key = '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')
+client = Anthropic(api_key = 'CLAUDE_API_KEY')
 
 
 # def estimate_tokens(prompt):
